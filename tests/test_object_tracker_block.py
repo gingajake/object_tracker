@@ -8,7 +8,7 @@ class TestExample(NIOBlockTestCase):
 
     def test_process_signals(self):
         """Signals pass through block unmodified."""
-        blk = Example()
+        blk = ObjectTracker()
         self.configure_block(blk, {})
         blk.start()
         blk.process_signals([Signal({"hello": "n.io"})])

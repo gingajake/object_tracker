@@ -1,100 +1,106 @@
-from nio.block.base import Block
-from nio.properties import VersionProperty
-
 from collections import deque
+from enum import Enum
 import numpy as np
-import argparse
 import imutils
 import cv2
 
-class FilterType(Enum):
+from nio.block.base import Block, Signal
+from nio.properties import Property, VersionProperty, ListProperty, \
+    BoolProperty, PropertyHolder, SelectProperty, StringProperty, IntProperty
+
+
+class FilterTypes(Enum):
     hsv = 'HSV'
     rgb = 'RGB'
+
+class ImageFilters(PropertyHolder):
+    filter_type = SelectProperty(FilterTypes,
+                                 title='Filter type',
+                                 default=FilterTypes.hsv)
+    filter_lo = Property(title='Lower bounds for image filter',
+                         default='',
+                         allow_none=True)
+    filter_hi = Property(title='Upper bounds for image filter',
+                         default='',
+                         allow_none=True)
 
 class TrackObject(Block):
 
     version = VersionProperty('0.1.0')
-    camera = IntProperty(title='Camera Index', default=0)
     ipcam = BoolProperty(title='Use IP Camera?', default=False)
-    ipcam_address = StringProperty(title='IP Camera Address', default='')
-    video_ref = StringProperty(title='Path to video file',default='')
-    filter_type = SelectProperty(FilterType, title='Filter type',
-                                 default=FilterType.hsv)
-    filter_lo = StringProperty(title='Lower bounds for image filter',
-                                default= (0, 0, 0))
-    filter_hi = StringProperty(title='Upper bounds for image filter',
-                                default= (255, 255, 255))
+    camera = IntProperty(title='Camera Index', default=0)
+    ipcam_address = StringProperty(title='IP Camera Address',
+                                   default='',
+                                   allow_none=True)
+    video_ref = StringProperty(title='Path to video file',
+                               default='',
+                               allow_none=True)
+    filters = ListProperty(ImageFilters,
+                           title='Filters',
+                           default=[])
 
     def __init__(self):
         super().__init__()
         self.video_capture = None
 
     def start(self):
-        if not self.ipcam():
-            self.video_capture = cv2.VideoCapture(self.camera())
+        print(self.video_ref())
+        if not self.ipcam() and self.video_ref() == None:
+            self.camera = cv2.VideoCapture(self.camera())
+        else:
+            self.video_capture = cv2.VideoCapture(self.video_ref())
 
     def process_signals(self, signals):
-        pts = deque(maxlen=args["buffer"])
         counter = 0
         (dX, dY) = (0, 0)
         direction = ""
 
         for signal in signals:
-            (grabbed,frame) = camera.read()
+            try:
+                (grabbed,frame) = self.video_capture.read()
+            except:
+                break
+            if (not grabbed):
+                break
+
             frame = imutils.resize(frame, width=600)
             blurred = cv2.GaussianBlur(frame, (11, 11), 0)
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
             # construct a mask and perform dialations and erosions to remove
             # any small blobs left in the mask
-            mask = cv2.inRange(hsv, redCarLower, redCarUpper)
+            mask = cv2.inRange(hsv, tuple(self.filters()[0].filter_lo()),
+                                tuple(self.filters()[0].filter_hi()))
             mask = cv2.erode(mask, None, iterations=2)
             mask = cv2.dilate(mask, None, iterations=2)
 
-            # find contours in the mask and initialize the current
-            # (x, y) center of the ball
+            self.logger.critical(mask)
+            # find contours in the mask and initialize the current center
             cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                 cv2.CHAIN_APPROX_SIMPLE)[-2]
-            center = None
-
-            # only proceed if at least one contour was found
-        	if len(cnts) > 0:
+            center = (0,0)
+            self.logger.critical(center)
+            self.logger.critical(cnts)
+            if len(cnts)>0:
         		# find the largest contour in the mask, then use to compute centroid
-        		c = max(cnts, key=cv2.contourArea)
-        		((x, y), radius) = cv2.minEnclosingCircle(c)
-        		M = cv2.moments(c)
-        		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
+                c = max(cnts, key=cv2.contourArea)
+                ((x, y), radius) = cv2.minEnclosingCircle(c)
+                M = cv2.moments(c)
+                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+                self.logger.debug(center)
         		# only proceed if the radius meets a minimum size
-        		if radius > 10:
+                if radius > 10:
         			# draw the circle and centroid on the frame & update points
-        			cv2.circle(frame, (int(x), int(y)), int(radius),
-        				(0, 255, 255), 2)
-        			cv2.circle(frame, center, 5, (0, 0, 255), -1)
+                    cv2.circle(frame, (int(x), int(y)), int(radius),
+	                   (0, 255, 255), 2)
+                    cv2.circle(frame, center, 5, (0, 0, 255), -1)
 
-        	# update the points queue
-        	pts.appendleft(center)
-        	# loop over the set of tracked points
-        	for i in range(1, len(pts)):
-        		# if either of the tracked points are None, ignore
-        		# them
-        		if pts[i - 1] is None or pts[i] is None:
-        			continue
-
-        		# otherwise, compute the thickness of the line and
-        		# draw the connecting lines
-        		thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
-        		cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
-
-        	# show the frame to our screen
-        	cv2.imshow("Frame", frame)
-        	key = cv2.waitKey(1) & 0xFF
-
-             sig = Signal({
-                #NEED JAMES TO LET ME KNOW WHATS NEEDED
+            track_center = {
+                'x_coord': center[0],
+                'y_coord': center[1]
+            }
+            sig = Signal({
+            "center" : track_center
             })
-            self.notify_signals([sig])
 
-        # cleanup the camera and close any open windows
-        camera.release()
-        cv2.destroyAllWindows()
+            self.notify_signals([sig])

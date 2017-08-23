@@ -1,13 +1,11 @@
-TrackObject
+TrackObjects
 ========
-Grab a frame of video from a specified camera, find an object based on filtering
-defined in the block, and then output the centroid location of that object.
+Grab a frame of video from a specified camera or video, find an object based on filtering defined in the block, and then output the centroid location of that
+object.
 
 Properties
 ----------
-- **camera**: Where to find the local camera to read from.
-- **frame_size**: Scaling factor for frame.
-- **camera**: Whether or not to use an IP Camera.
+- **camera**: Where to find the local camera to read from. Index 0 references the localhost default camera
 - **ipcam**: Whether or not to use an IP Camera.
 - **ipcam_address**: Address for where to find the IP camera.
 - **video_ref**: File location of video to be processed

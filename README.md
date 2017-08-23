@@ -1,7 +1,6 @@
 TrackObjects
 ========
-Grab a frame of video from a specified camera or video, find an object based on filtering defined in the block, and then output the centroid location of that
-object.
+Grab a frame of video from a specified camera or video, find an object based on filtering defined in the block, and then output the centroid location of that object in the frame.
 
 Properties
 ----------

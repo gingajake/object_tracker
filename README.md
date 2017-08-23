@@ -35,8 +35,6 @@ Dependencies
 
 Input Example
 -------------
-```
-```
 
 Output Example
 --------------

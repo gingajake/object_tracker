@@ -46,7 +46,7 @@ class TrackObject(Block):
     def start(self):
         print(self.video_ref())
         if not self.ipcam() and self.video_ref() == None:
-            self.camera = cv2.VideoCapture(self.camera())
+            self.video_capture = cv2.VideoCapture(self.camera())
         else:
             self.video_capture = cv2.VideoCapture(self.video_ref())
 
@@ -61,8 +61,8 @@ class TrackObject(Block):
             except:
                 break
             if (not grabbed):
+                self.logger.critical('FAILED')
                 break
-
             frame = imutils.resize(frame, width=600)
             blurred = cv2.GaussianBlur(frame, (11, 11), 0)
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -82,7 +82,7 @@ class TrackObject(Block):
             self.logger.critical(center)
             self.logger.critical(cnts)
             if len(cnts)>0:
-        		# find the largest contour in the mask, then use to compute centroid
+        		# find the largest contour in the mask, then use to find centroid
                 c = max(cnts, key=cv2.contourArea)
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
                 M = cv2.moments(c)
@@ -104,3 +104,6 @@ class TrackObject(Block):
             })
 
             self.notify_signals([sig])
+
+
+# TODO: Support for multiple filters/objects

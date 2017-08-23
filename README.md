@@ -43,9 +43,9 @@ Output Example
 ```
 {
   'track': {
-    'object': 'Object1',
-    'y_coord': 37,
-    'x_coord': 86
+            'object': 'Object1',
+            'y_coord': 37,
+            'x_coord': 86
   }
 }
 ```

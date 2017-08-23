@@ -44,7 +44,6 @@ class TrackObject(Block):
         self.video_capture = None
 
     def start(self):
-        print(self.video_ref())
         if not self.ipcam() and self.video_ref() == None:
             self.video_capture = cv2.VideoCapture(self.camera())
         else:
@@ -74,20 +73,17 @@ class TrackObject(Block):
             mask = cv2.erode(mask, None, iterations=2)
             mask = cv2.dilate(mask, None, iterations=2)
 
-            self.logger.critical(mask)
             # find contours in the mask and initialize the current center
             cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                 cv2.CHAIN_APPROX_SIMPLE)[-2]
             center = (0,0)
-            self.logger.critical(center)
-            self.logger.critical(cnts)
+
             if len(cnts)>0:
         		# find the largest contour in the mask, then use to find centroid
                 c = max(cnts, key=cv2.contourArea)
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-                self.logger.debug(center)
         		# only proceed if the radius meets a minimum size
                 if radius > 10:
         			# draw the circle and centroid on the frame & update points

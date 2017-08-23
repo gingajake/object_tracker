@@ -42,8 +42,10 @@ Output Example
 --------------
 ```
 {
- 'object': 'TestObject',
- 'x_coord': 123,
- 'y_coord': 456
+  'track': {
+    'object': 'Object1',
+    'y_coord': 37,
+    'x_coord': 86
+  }
 }
 ```

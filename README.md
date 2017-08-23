@@ -29,9 +29,9 @@ Commands
 Dependencies
 ------------
 -    opencv-python
--    argparse
 -    imutils
 -    numpy
+-    enum
 
 Input Example
 -------------

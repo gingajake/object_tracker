@@ -1,6 +1,4 @@
-from collections import deque
 from enum import Enum
-import numpy as np
 import imutils
 import cv2
 
@@ -53,9 +51,6 @@ class TrackObjects(Block):
             self.video_capture = cv2.VideoCapture(self.video_ref())
 
     def process_signals(self, signals):
-        counter = 0
-        (dX, dY) = (0, 0)
-        direction = ""
 
         for signal in signals:
             try:
@@ -66,7 +61,6 @@ class TrackObjects(Block):
                 break
 
             frame = imutils.resize(frame, width=600)
-            blurred = cv2.GaussianBlur(frame, (11, 11), 0)
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
             # construct a mask and perform dialations and erosions to remove

@@ -18,42 +18,57 @@ class TestTrackObjects(NIOBlockTestCase):
 
     def test_track_one_object(self):
         blk = TrackObjects()
-        with patch(TrackObjects.__module__ + '.cv2.VideoCapture') as \
-                mock_video_capture, \
-                patch(TrackObjects.__module__ + '.object_tracker') as mock_face:
-            mock_video_capture.return_value.read.return_value = \
-                'bytes', 'frameBytes'
-            self.configure_block(blk, {})
+        with patch(TrackObjects.__module__ + '.cv2') as patch_cv2:
+            patch_cv2.VideoCapture = MagicMock()
+            patch_cv2.cvtColor = MagicMock()
+            patch_cv2.findContours = MagicMock()
+        with patch_cv2(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+            patch_im.resize = MagicMock()
+
+            patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
+            patch_cv2.cvtColor.return_value = 'grayscaleframe'
+            patch_cv2.findContours.return_value = [1,2,3]
+
+            patch_im.resize.return_value = 'frame.jpg'
+
+            self.configure_block(blk, {
+                'ipcam': True,
+                'ipcam_address': 'ipcamAddress',
+                'filter': [{
+                    'obj': 'testObject',
+                    'filter_type': 'HSV',
+                    'filter_hi': [255, 255, 255],
+                    'filter_lo': [1, 1, 1]
+                }]
+            })
             blk.start()
-            blk.process_signals([Signal({})])
+            blk.process_signals([Signal({
+                'sim': 1
+            })])
             self.assert_num_signals_notified(1)
-            self.assert_last_signal_list_notified([Signal({})])
             blk.stop()
 
-    def test_track_two_objects(self):
+    def test_track_none(self):
         blk = TrackObjects()
-        with patch(TrackObjects.__module__ + '.cv2.VideoCapture') as \
-                mock_video_capture, \
-                patch(TrackObjects.__module__ + '.object_tracker') as mock_face:
-            mock_video_capture.return_value.read.return_value = \
-                'bytes', 'frameBytes'
-            self.configure_block(blk, {})
-            blk.start()
-            blk.process_signals([Signal({})])
-            self.assert_num_signals_notified(1)
-            self.assert_last_signal_list_notified([Signal({})])
-            blk.stop()
+        with patch(TrackObjects.__module__ + '.cv2') as patch_cv2:
+            patch_cv2.VideoCapture = MagicMock()
+            patch_cv2.cvtColor = MagicMock()
+            patch_cv2.findContours = MagicMock()
+        with patch_cv2(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+            patch_im.resize = MagicMock()
+            patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
+            patch_cv2.cvtColor.return_value = 'grayscaleframe'
+            patch_cv2.findContours.return_value = [1,2,3]
 
-    def track_none(self):
-        blk = TrackObjects()
-        with patch(TrackObjects.__module__ + '.cv2.VideoCapture') as \
-                mock_video_capture, \
-                patch(TrackObjects.__module__ + '.object_tracker') as mock_face:
-            mock_video_capture.return_value.read.return_value = \
-                'bytes', 'frameBytes'
             self.configure_block(blk, {})
             blk.start()
-            blk.process_signals([Signal({})])
+            blk.process_signals([Signal({
+                'sim': 1
+            })])
             self.assert_num_signals_notified(0)
-            self.assert_last_signal_list_notified([Signal({})])
+            self.assert_last_signal_list_notified([Signal({
+                'object': 'testObject',
+                'x_coord': None,
+                'y_coord': None
+            })])
             blk.stop()

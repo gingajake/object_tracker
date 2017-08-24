@@ -61,13 +61,16 @@ class TrackObjects(Block):
                 break
 
             frame = imutils.resize(frame, width=600)
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
+            
             # construct a mask and perform dialations and erosions to remove
             # any small blobs left in the mask
-
             for each in self.filters():
-                mask = cv2.inRange(hsv, tuple(each.filter_lo()),
+                if(str(each.filter_type()) == 'hsv'):
+                    space = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                else:
+                    space = frame
+
+                mask = cv2.inRange(space, tuple(each.filter_lo()),
                                    tuple(each.filter_hi()))
                 mask = cv2.erode(mask, None, iterations=2)
                 mask = cv2.dilate(mask, None, iterations=2)

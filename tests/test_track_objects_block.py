@@ -19,13 +19,13 @@ class TestTrackObjects(NIOBlockTestCase):
     def test_track_one_object(self):
         blk = TrackObjects()
         with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
-            patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+                patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
             patch_cv2.VideoCapture = MagicMock()
             patch_cv2.minEnclosingCircle = MagicMock()
             patch_im.resize = MagicMock()
 
             patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
-            patch_cv2.minEnclosingCircle.return_value = ((156,225), 10.2)
+            patch_cv2.minEnclosingCircle.return_value = ((156, 225), 10.2)
             patch_im.resize.return_value = 'frame.jpg'
 
             self.configure_block(blk, {
@@ -48,13 +48,13 @@ class TestTrackObjects(NIOBlockTestCase):
     def test_track_multiple_objects(self):
         blk = TrackObjects()
         with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
-            patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+                patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
             patch_cv2.VideoCapture = MagicMock()
             patch_cv2.minEnclosingCircle = MagicMock()
             patch_im.resize = MagicMock()
 
             patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
-            patch_cv2.minEnclosingCircle.return_value = ((156,225), 10.2)
+            patch_cv2.minEnclosingCircle.return_value = ((156, 225), 10.2)
             patch_im.resize.return_value = 'frame.jpg'
 
             self.configure_block(blk, {
@@ -83,13 +83,13 @@ class TestTrackObjects(NIOBlockTestCase):
     def test_track_none(self):
         blk = TrackObjects()
         with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
-            patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+                patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
             patch_cv2.VideoCapture = MagicMock()
             patch_cv2.minEnclosingCircle = MagicMock()
             patch_im.resize = MagicMock()
 
             patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
-            patch_cv2.minEnclosingCircle.return_value = ((156,225), 10.2)
+            patch_cv2.minEnclosingCircle.return_value = ((156, 225), 10.2)
             patch_im.resize.return_value = 'frame.jpg'
 
             self.configure_block(blk, {

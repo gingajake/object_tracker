@@ -79,10 +79,11 @@ def main():
             else:
                 frame_to_thresh = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-        v1_min, v2_min, v3_min, v1_max, v2_max, v3_max = get_trackbar_values(range_filter)
+        v1_min, v2_min, v3_min, v1_max, v2_max, v3_max = \
+            get_trackbar_values(range_filter)
 
         thresh = cv2.inRange(frame_to_thresh, (v1_min, v2_min, v3_min),
-                            (v1_max, v2_max, v3_max))
+                             (v1_max, v2_max, v3_max))
 
         if args['preview']:
             preview = cv2.bitwise_and(image, image, mask=thresh)
@@ -92,7 +93,8 @@ def main():
             cv2.imshow("Thresh", thresh)
 
         if cv2.waitKey(1) & 0xFF is ord('q'):
-            print(get_trackbar_values(range_filter))
+            print(get_trackbar_values(range_filter)[0:3])
+            print(get_trackbar_values(range_filter)[3:6])
             break
 
 

@@ -60,6 +60,15 @@ Running this script will load 3 windows:
 The goal in adjusting the filters via the track bar should be to isolate the object(s)
 you intend to track using the TrackObjects block.  
 
+Once you are satisfied with your filters, press 'q' on the keyboard, and the two filter bands,
+(low and high), will be printed in the window where you entered the command to run the script.
+
+Example Output:
+```
+[0, 0, 0]
+[255, 255, 255]
+```
+
 Flags
 -----
 - **-f Filter Type**: Flag for filter type, with two options.  HSV or RGB

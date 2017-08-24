@@ -90,6 +90,7 @@ class TrackObjects(Block):
             		# only proceed if the radius meets a minimum size
                     if radius > 10:
             			# draw the circle and centroid on the frame & update points
+                        # NOTE: This could be removed if we don't need visual
                         cv2.circle(frame, (int(x), int(y)), int(radius),
     	                   (0, 255, 255), 2)
                         cv2.circle(frame, center, 5, (0, 0, 255), -1)
@@ -100,13 +101,15 @@ class TrackObjects(Block):
                         'x_coord': center[0],
                         'y_coord': center[1]
                     }
-                    sig = Signal({
-                    "track" : track_center
-                    })
-                    self.notify_signals([sig])
 
                 else:
-                    sig = Signal({
-                    "track" : None
-                    })
-                    self.notify_signals([sig])
+                    track_center = {
+                        'object': each.obj(),
+                        'x_coord': None,
+                        'y_coord': None
+                    }
+                sig = Signal({
+                "track" : track_center
+                })
+
+                self.notify_signals([sig])

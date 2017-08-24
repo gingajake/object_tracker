@@ -18,23 +18,20 @@ class TestTrackObjects(NIOBlockTestCase):
 
     def test_track_one_object(self):
         blk = TrackObjects()
-        with patch(TrackObjects.__module__ + '.cv2') as patch_cv2:
+        with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
+            patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
             patch_cv2.VideoCapture = MagicMock()
-            patch_cv2.cvtColor = MagicMock()
-            patch_cv2.findContours = MagicMock()
-        with patch_cv2(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+            patch_cv2.minEnclosingCircle = MagicMock()
             patch_im.resize = MagicMock()
 
             patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
-            patch_cv2.cvtColor.return_value = 'grayscaleframe'
-            patch_cv2.findContours.return_value = [1,2,3]
-
+            patch_cv2.minEnclosingCircle.return_value = ((156,225), 10.2)
             patch_im.resize.return_value = 'frame.jpg'
 
             self.configure_block(blk, {
                 'ipcam': True,
                 'ipcam_address': 'ipcamAddress',
-                'filter': [{
+                'filters': [{
                     'obj': 'testObject',
                     'filter_type': 'HSV',
                     'filter_hi': [255, 255, 255],
@@ -48,27 +45,72 @@ class TestTrackObjects(NIOBlockTestCase):
             self.assert_num_signals_notified(1)
             blk.stop()
 
-    def test_track_none(self):
+    def test_track_multiple_objects(self):
         blk = TrackObjects()
-        with patch(TrackObjects.__module__ + '.cv2') as patch_cv2:
+        with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
+            patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
             patch_cv2.VideoCapture = MagicMock()
-            patch_cv2.cvtColor = MagicMock()
-            patch_cv2.findContours = MagicMock()
-        with patch_cv2(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+            patch_cv2.minEnclosingCircle = MagicMock()
             patch_im.resize = MagicMock()
-            patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
-            patch_cv2.cvtColor.return_value = 'grayscaleframe'
-            patch_cv2.findContours.return_value = [1,2,3]
 
-            self.configure_block(blk, {})
+            patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
+            patch_cv2.minEnclosingCircle.return_value = ((156,225), 10.2)
+            patch_im.resize.return_value = 'frame.jpg'
+
+            self.configure_block(blk, {
+                'ipcam': True,
+                'ipcam_address': 'ipcamAddress',
+                'filters': [{
+                    'obj': 'Object1',
+                    'filter_type': 'HSV',
+                    'filter_hi': [255, 255, 255],
+                    'filter_lo': [1, 1, 1]
+                    },
+                    {
+                    'obj': 'Object2',
+                    'filter_type': 'HSV',
+                    'filter_hi': [100, 100, 100],
+                    'filter_lo': [10, 10, 10]
+                    }]
+            })
             blk.start()
             blk.process_signals([Signal({
                 'sim': 1
             })])
-            self.assert_num_signals_notified(0)
-            self.assert_last_signal_list_notified([Signal({
-                'object': 'testObject',
-                'x_coord': None,
-                'y_coord': None
+            self.assert_num_signals_notified(2)
+            blk.stop()
+
+    def test_track_none(self):
+        blk = TrackObjects()
+        with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
+            patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
+            patch_cv2.VideoCapture = MagicMock()
+            patch_cv2.minEnclosingCircle = MagicMock()
+            patch_im.resize = MagicMock()
+
+            patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
+            patch_cv2.minEnclosingCircle.return_value = ((156,225), 10.2)
+            patch_im.resize.return_value = 'frame.jpg'
+
+            self.configure_block(blk, {
+                'ipcam': False,
+                'filters': [{
+                    'obj': 'testObject',
+                    'filter_type': 'HSV',
+                    'filter_hi': [255, 255, 255],
+                    'filter_lo': [1, 1, 1]
+                }]
+            })
+            blk.start()
+            blk.process_signals([Signal({
+                'sim': 1
             })])
+            self.assert_num_signals_notified(1)
+            self.assert_last_signal_notified(Signal({
+                'track': {
+                    'object': 'testObject',
+                    'x_coord': None,
+                    'y_coord': None
+                }
+            }))
             blk.stop()

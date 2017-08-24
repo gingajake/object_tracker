@@ -20,9 +20,6 @@ class TestTrackObjects(NIOBlockTestCase):
         blk = TrackObjects()
         with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
                 patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
-            patch_cv2.VideoCapture = MagicMock()
-            patch_cv2.minEnclosingCircle = MagicMock()
-            patch_im.resize = MagicMock()
 
             patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
             patch_cv2.minEnclosingCircle.return_value = ((156, 225), 10.2)
@@ -49,9 +46,6 @@ class TestTrackObjects(NIOBlockTestCase):
         blk = TrackObjects()
         with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
                 patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
-            patch_cv2.VideoCapture = MagicMock()
-            patch_cv2.minEnclosingCircle = MagicMock()
-            patch_im.resize = MagicMock()
 
             patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
             patch_cv2.minEnclosingCircle.return_value = ((156, 225), 10.2)
@@ -84,9 +78,6 @@ class TestTrackObjects(NIOBlockTestCase):
         blk = TrackObjects()
         with patch(TrackObjects.__module__ + '.cv2') as patch_cv2, \
                 patch(TrackObjects.__module__ + '.imutils.resize') as patch_im:
-            patch_cv2.VideoCapture = MagicMock()
-            patch_cv2.minEnclosingCircle = MagicMock()
-            patch_im.resize = MagicMock()
 
             patch_cv2.VideoCapture.return_value.read.return_value = ('g', 'f')
             patch_cv2.minEnclosingCircle.return_value = ((156, 225), 10.2)
